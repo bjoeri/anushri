@@ -62,7 +62,6 @@ extern const prog_uint8_t wav_res_deadband[] PROGMEM;
 extern const prog_uint8_t wav_res_pitch_deadband[] PROGMEM;
 extern const prog_uint8_t wav_res_drm_envelope[] PROGMEM;
 extern const prog_uint8_t wav_res_sine[] PROGMEM;
-extern const prog_uint8_t wav_res_hh[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_0[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_1[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_2[] PROGMEM;
@@ -109,25 +108,23 @@ extern const prog_uint8_t wav_res_drum_map_node_8[] PROGMEM;
 #define WAV_RES_DRM_ENVELOPE_SIZE 257
 #define WAV_RES_SINE 3
 #define WAV_RES_SINE_SIZE 257
-#define WAV_RES_HH 4
-#define WAV_RES_HH_SIZE 4097
-#define WAV_RES_DRUM_MAP_NODE_0 5
+#define WAV_RES_DRUM_MAP_NODE_0 4
 #define WAV_RES_DRUM_MAP_NODE_0_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_1 6
+#define WAV_RES_DRUM_MAP_NODE_1 5
 #define WAV_RES_DRUM_MAP_NODE_1_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_2 7
+#define WAV_RES_DRUM_MAP_NODE_2 6
 #define WAV_RES_DRUM_MAP_NODE_2_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_3 8
+#define WAV_RES_DRUM_MAP_NODE_3 7
 #define WAV_RES_DRUM_MAP_NODE_3_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_4 9
+#define WAV_RES_DRUM_MAP_NODE_4 8
 #define WAV_RES_DRUM_MAP_NODE_4_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_5 10
+#define WAV_RES_DRUM_MAP_NODE_5 9
 #define WAV_RES_DRUM_MAP_NODE_5_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_6 11
+#define WAV_RES_DRUM_MAP_NODE_6 10
 #define WAV_RES_DRUM_MAP_NODE_6_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_7 12
+#define WAV_RES_DRUM_MAP_NODE_7 11
 #define WAV_RES_DRUM_MAP_NODE_7_SIZE 48
-#define WAV_RES_DRUM_MAP_NODE_8 13
+#define WAV_RES_DRUM_MAP_NODE_8 12
 #define WAV_RES_DRUM_MAP_NODE_8_SIZE 48
 typedef avrlib::ResourcesManager<
     ResourceId,

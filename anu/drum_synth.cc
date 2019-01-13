@@ -66,11 +66,22 @@ static const prog_uint8_t preset_sd_3[] PROGMEM = { 108, 36, 50, 90, 180 };
 static const prog_uint8_t preset_sd_4[] PROGMEM = { 116, 36, 32, 80, 150 };
 static const prog_uint8_t preset_sd_5[] PROGMEM = { 124, 40, 190, 90, 40 };
 
-static const prog_uint8_t preset_hh_1[] PROGMEM = { 124, 0, 0, 80, 0 };
-static const prog_uint8_t preset_hh_2[] PROGMEM = { 136, 0, 0, 80, 0 };
-static const prog_uint8_t preset_hh_3[] PROGMEM = { 136, 0, 0, 110, 0 };
-static const prog_uint8_t preset_hh_4[] PROGMEM = { 148, 0, 0, 90, 0 };
-static const prog_uint8_t preset_hh_5[] PROGMEM = { 154, 0, 0, 45, 0 };
+/*
+* Hi-hat synthesis is done in the style of YM3812/OPL2 and is derived from its  
+* MAME emulation (fmopl.cpp). Hi-hat operator frequencies has been derived from 
+* actual observations of Yamaha PSS-460 samples and OPL2 emulation comparisons.
+*
+* 1st Hi-hat operator should have a frequency of ~508Hz (Yamaha PSS-460)
+* 2nd Hi-hat operator frequency is hard-wired to 2/3 of 1st operator frequency 
+* For optimization reasons the hi-hat presets should contain the index for the 
+* 2nd operator phase increment, e.g. index ~132 for ~508*2/3 Hz (569 phase inc).
+* Crunchiness is used to set level of noise (max for hi-hat and min for cymbal).
+*/
+static const prog_uint8_t preset_hh_1[] PROGMEM = { 132, 0, 0, 80, 255 };
+static const prog_uint8_t preset_hh_2[] PROGMEM = { 134, 0, 0, 80, 255 };
+static const prog_uint8_t preset_hh_3[] PROGMEM = { 134, 0, 0, 90, 32 };
+static const prog_uint8_t preset_hh_4[] PROGMEM = { 134, 0, 0, 90, 255 };
+static const prog_uint8_t preset_hh_5[] PROGMEM = { 134, 0, 0, 45, 255 };
 
 static const prog_uint8_t* drum_presets[] = {
   preset_bd_1,
@@ -132,8 +143,10 @@ static const prog_uint8_t drums_cc_map[] PROGMEM = {
   0, 1, 2, 3, 4, 5,
   // SD
   6, 7, 8, 9, 10, 11,
-  //
+  // HH
+#if 1 //BER:TODO: Add more parameter(s) for new OPL2 (YM3812) style HH
   12, 15, 17
+#endif
 };
 
 /* static */
@@ -190,6 +203,8 @@ void DrumSynth::Render() {
     uint16_t phase_0 = state_[0].phase;
     uint16_t phase_1 = state_[1].phase;
     uint16_t phase_2 = state_[2].phase;
+    uint16_t phase_2b = state_[2].pitch_env_phase; // pitch_env_phase used as 2nd phase for hi-hat
+    const int8_t hhnoisesample = 120 - S8U8MulShift8(80, state_[2].amp_level_noise); // modulation of noise level for Hi-hat/Cymbal morph
     for (uint8_t i = 0; i < kAudioBlockSize; ++i) {
       ++sample_counter;
       int16_t mix = 128;
@@ -198,6 +213,7 @@ void DrumSynth::Render() {
       phase_0 += state_[0].phase_increment;
       phase_1 += state_[1].phase_increment;
       phase_2 += state_[2].phase_increment;
+      phase_2b += state_[2].pitch_env_increment; // pitch_env_increment updates 2nd phase for hi-hat
       
       // Linear interpolation optimized for the case when the delta
       // between adjacent samples is in the -127..+127 range.
@@ -212,8 +228,35 @@ void DrumSynth::Render() {
       mix += S8U8MulShift8(sd, state_[1].amp_level);
       mix += S8U8MulShift8(noise, state_[1].amp_level_noise);
 
-      int8_t hh = pgm_read_byte(wav_res_hh + U16ShiftRight4(phase_2));
-      mix += S8U8MulShift8(hh, state_[2].amp_level);
+      // Mimic OPL2/YM3812 style hi-hat
+      const uint8_t hibits_phase_2 = phase_2 >> 8;
+      const uint8_t bit2 = (hibits_phase_2 & 0x04);
+      const uint8_t bit3 = (hibits_phase_2 & 0x08);
+      const uint8_t bit7 = (hibits_phase_2 & 0x80);
+      const uint8_t res1 = bit3 || ((bit2 || bit7) && !(bit2 && bit7)); // bit3 | bit2 ^ bit7
+      const uint8_t hibits_phase_2b = phase_2b >> 8;
+      const uint8_t bit3e = (hibits_phase_2b & 0x08);
+      const uint8_t bit5e = (hibits_phase_2b & 0x20);
+      const uint8_t res2 = ((bit3e || bit5e) && !(bit3e && bit5e)); // bit3e ^ bit5e
+      int8_t hhsample;
+      if (res2 || res1) {
+        if (noise & 0x1) {
+          hhsample = -hhnoisesample; // OPL2 sinlookup = 0x2d0 with noise
+        }
+        else {
+          hhsample = -120; // OPL2 sinlookup = 0x234
+        }
+      } 
+      else {
+        if (noise & 0x1) { 
+          hhsample = hhnoisesample; // OPL2 sinlookup = 0x34 with noise
+        }
+        else {
+          hhsample = 120; // OPL2 sinlookup = 0xd0
+        }
+      }
+      
+      mix += S8U8MulShift8(hhsample, state_[2].amp_level);
       
       if (sample_counter > sample_rate_) {
         if (mix > 255) mix = 255;
@@ -226,6 +269,7 @@ void DrumSynth::Render() {
     state_[0].phase = phase_0;
     state_[1].phase = phase_1;
     state_[2].phase = phase_2;
+    state_[2].pitch_env_phase = phase_2b; // pitch_env_phase used as 2nd phase for hi-hat
   }
   sample_ = sample;
   sample_counter_ = sample_counter;
@@ -242,31 +286,36 @@ void DrumSynth::UpdateModulations() {
       state_[i].amp_env_phase = 0xffff;
       state_[i].amp_env_increment = 0;
     }
+    else {
+      playing_ = true;
+    }
     state_[i].amp_level = U8U8MulShift8(
         state_[i].level,
         InterpolateSample(wav_res_drm_envelope, state_[i].amp_env_phase));
     
-    // Step pitch envelope.
-    state_[i].pitch_env_phase += state_[i].pitch_env_increment;
-    if (state_[i].pitch_env_phase < state_[i].pitch_env_increment) {
-      state_[i].pitch_env_phase = 0xffff;
-      state_[i].pitch_env_increment = 0;
-    }
-
     // Compute pitch
     uint16_t pitch = static_cast<uint16_t>(patch_[i].pitch) << 8;
-    if (i == 0) {
+    if (i == 0) { // add pitch crunchiness mod for BD
       pitch += U8U8Mul(Random::GetByte(), patch_[i].crunchiness);
     }
-    pitch += U8U8Mul(
+    if (i != 2) { // add pitch envelope mod for BD/SD
+      state_[i].pitch_env_phase += state_[i].pitch_env_increment;
+      if (state_[i].pitch_env_phase < state_[i].pitch_env_increment) {
+        state_[i].pitch_env_phase = 0xffff;
+        state_[i].pitch_env_increment = 0;
+      }
+      pitch += U8U8Mul(
         patch_[i].pitch_mod,
         InterpolateSample(wav_res_drm_envelope, state_[i].pitch_env_phase));
+    }
+    // Compute phase increment from pitch
     state_[i].phase_increment = InterpolateIncreasing(
         lut_res_drm_phase_increments,
         pitch);
-        
-    if (state_[i].amp_env_increment) {
-      playing_ = true;
+    if (i == 2) {
+      // pitch_env_increment used as 2nd phase for hi-hat, hardwired to 2/3 of 1st operator
+      state_[i].pitch_env_increment = state_[i].phase_increment;
+      state_[i].phase_increment = (state_[i].phase_increment * 3) / 2;
     }
   }
   state_[1].amp_level_noise = U8U8MulShift8(
@@ -275,7 +324,7 @@ void DrumSynth::UpdateModulations() {
   state_[1].amp_level = U8U8MulShift8(
       state_[1].amp_level,
       ~patch_[1].crunchiness);
-  state_[2].phase_increment >>= 6;
+  state_[2].amp_level_noise = patch_[2].crunchiness; // crunchiness for hi-hat noise
 }
 
 /* static */

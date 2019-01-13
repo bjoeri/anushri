@@ -56,9 +56,9 @@ sine = -numpy.sin(numpy.arange(257) / float(257) * 2 * numpy.pi) * 127.5 + 127.5
 waveforms.append(('sine', scale(sine) + 128))
 
 # HH
-hh = map(ord, file('anu/resources/hh_linn.raw').read())
-hh = hh[:4097]
-waveforms.append(('hh', hh))
+#hh = map(ord, file('anu/resources/hh_linn.raw').read())
+#hh = hh[:4097]
+#waveforms.append(('hh', hh))
 
 # DrumMap nodes
 nodes = [[236, 0, 0, 138, 0, 0, 208, 0, 58, 28, 174, 0, 104, 0, 58, 0, 10, 66, 0, 8, 232, 0, 0, 38, 0, 148, 0, 14, 198, 0, 114, 0, 154, 98, 244, 34, 160, 108, 192, 24, 160, 98, 228, 20, 160, 92, 194, 44],
