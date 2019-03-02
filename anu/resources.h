@@ -71,6 +71,22 @@ extern const prog_uint8_t wav_res_drum_map_node_5[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_6[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_7[] PROGMEM;
 extern const prog_uint8_t wav_res_drum_map_node_8[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_9[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_10[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_11[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_12[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_13[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_14[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_15[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_16[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_17[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_18[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_19[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_20[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_21[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_22[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_23[] PROGMEM;
+extern const prog_uint8_t wav_res_drum_map_node_24[] PROGMEM;
 #define STR_RES_DUMMY 0  // dummy
 #define LUT_RES_GLIDE_INCREMENTS 0
 #define LUT_RES_GLIDE_INCREMENTS_SIZE 256
@@ -109,23 +125,55 @@ extern const prog_uint8_t wav_res_drum_map_node_8[] PROGMEM;
 #define WAV_RES_SINE 3
 #define WAV_RES_SINE_SIZE 257
 #define WAV_RES_DRUM_MAP_NODE_0 4
-#define WAV_RES_DRUM_MAP_NODE_0_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_0_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_1 5
-#define WAV_RES_DRUM_MAP_NODE_1_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_1_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_2 6
-#define WAV_RES_DRUM_MAP_NODE_2_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_2_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_3 7
-#define WAV_RES_DRUM_MAP_NODE_3_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_3_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_4 8
-#define WAV_RES_DRUM_MAP_NODE_4_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_4_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_5 9
-#define WAV_RES_DRUM_MAP_NODE_5_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_5_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_6 10
-#define WAV_RES_DRUM_MAP_NODE_6_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_6_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_7 11
-#define WAV_RES_DRUM_MAP_NODE_7_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_7_SIZE 96
 #define WAV_RES_DRUM_MAP_NODE_8 12
-#define WAV_RES_DRUM_MAP_NODE_8_SIZE 48
+#define WAV_RES_DRUM_MAP_NODE_8_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_9 13
+#define WAV_RES_DRUM_MAP_NODE_9_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_10 14
+#define WAV_RES_DRUM_MAP_NODE_10_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_11 15
+#define WAV_RES_DRUM_MAP_NODE_11_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_12 16
+#define WAV_RES_DRUM_MAP_NODE_12_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_13 17
+#define WAV_RES_DRUM_MAP_NODE_13_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_14 18
+#define WAV_RES_DRUM_MAP_NODE_14_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_15 19
+#define WAV_RES_DRUM_MAP_NODE_15_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_16 20
+#define WAV_RES_DRUM_MAP_NODE_16_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_17 21
+#define WAV_RES_DRUM_MAP_NODE_17_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_18 22
+#define WAV_RES_DRUM_MAP_NODE_18_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_19 23
+#define WAV_RES_DRUM_MAP_NODE_19_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_20 24
+#define WAV_RES_DRUM_MAP_NODE_20_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_21 25
+#define WAV_RES_DRUM_MAP_NODE_21_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_22 26
+#define WAV_RES_DRUM_MAP_NODE_22_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_23 27
+#define WAV_RES_DRUM_MAP_NODE_23_SIZE 96
+#define WAV_RES_DRUM_MAP_NODE_24 28
+#define WAV_RES_DRUM_MAP_NODE_24_SIZE 96
 typedef avrlib::ResourcesManager<
     ResourceId,
     avrlib::ResourcesTables<

@@ -94,11 +94,13 @@ static const prog_Sequence init_sequence PROGMEM = {
   { 60, 60, 48, 48 }
 };
 
-static const prog_uint8_t* drum_map[3][3] = {
-  { wav_res_drum_map_node_8, wav_res_drum_map_node_3, wav_res_drum_map_node_6 },
-  { wav_res_drum_map_node_2, wav_res_drum_map_node_4, wav_res_drum_map_node_0 },
-  { wav_res_drum_map_node_7, wav_res_drum_map_node_1, wav_res_drum_map_node_5 },
-};
+static const prog_uint8_t* drum_map[5][5] = {
+  { wav_res_drum_map_node_10, wav_res_drum_map_node_8, wav_res_drum_map_node_0, wav_res_drum_map_node_9, wav_res_drum_map_node_11 },
+  { wav_res_drum_map_node_15, wav_res_drum_map_node_7, wav_res_drum_map_node_13, wav_res_drum_map_node_12, wav_res_drum_map_node_6 },
+  { wav_res_drum_map_node_18, wav_res_drum_map_node_14, wav_res_drum_map_node_4, wav_res_drum_map_node_5, wav_res_drum_map_node_3 },
+  { wav_res_drum_map_node_23, wav_res_drum_map_node_16, wav_res_drum_map_node_21, wav_res_drum_map_node_1, wav_res_drum_map_node_2 },
+  { wav_res_drum_map_node_24, wav_res_drum_map_node_19, wav_res_drum_map_node_17, wav_res_drum_map_node_20, wav_res_drum_map_node_22 },
+}; // BER:NOTE: 32 step drum map nodes ported from Grids 
 
 template<>
 struct StorageLayout<SequencerSettings> {
@@ -120,8 +122,9 @@ struct StorageLayout<Sequence> {
   }
 };
 
-uint8_t clock_divisions[] = { 1, 2, 6 };
-uint8_t clock_internal_rate_compensation[] = { 6, 3, 1 };
+//BER:NOTE: 4 ppqn no longer available after port of 32 step nodes from Grids
+uint8_t clock_divisions[] = { 2, 2, 6 };
+uint8_t clock_internal_rate_compensation[] = { 3, 3, 1 };
 
 /* static */
 void VoiceController::Init() {
@@ -335,6 +338,10 @@ void VoiceController::Clock(bool midi_generated) {
     ClockSequencer();
     ClockDrumMachine();
   }
+  //BER:NOTE: Need to update drums on every clock since 32 steps for Grids patterns
+  if (clock_counter_ == (clock_divisions[system_settings.clock_ppqn()] >> 1)) {
+    ClockDrumMachine(); // Twice the update rate since 32 step nodes ported from Grids
+  }
   midi_dispatcher.OnClock(midi_generated);
   ++clock_counter_;
   if (clock_counter_ >= clock_divisions[system_settings.clock_ppqn()]) {
@@ -459,8 +466,8 @@ uint8_t drums_midi_notes[] = { 36, 38, 42 };
 
 /* static */
 void VoiceController::ClockDrumMachine() {
-  uint16_t step_mask = 1 << drum_sequencer_step_;
-  uint8_t override_mask = 1;
+  // BER:NOTE: pre-programmed patterns only have 16 steps (vs 32 step nodes ported from Grids)
+  uint16_t program_step_mask = 1 << (drum_sequencer_step_ >> 1);
   if (has_drums()) {
     uint8_t x = seq_settings_.drums_x;
     uint8_t y = seq_settings_.drums_y;
@@ -469,11 +476,16 @@ void VoiceController::ClockDrumMachine() {
       if (level < 255 - drum_sequencer_perturbation_[i]) {
         level += drum_sequencer_perturbation_[i];
       }
+#if 0 //BER:TODO: Should this "correction" be ported from Grids?
+      else {
+        level = 255;
+      }
+#endif
       uint8_t threshold = ~seq_settings_.drums_density[i];
       
       // Override generative sequencer with pre-programmed pattern.
-      if (seq_settings_.drums_override & override_mask) {
-        level = (seq_settings_.drums_pattern[i] & step_mask) ? 255 : 0;
+      if (seq_settings_.drums_override) {
+        level = (seq_settings_.drums_pattern[i] & program_step_mask) ? 255 : 0;
         threshold = 0;
       }
       
@@ -482,11 +494,10 @@ void VoiceController::ClockDrumMachine() {
         drum_synth.Trigger(i, level);
         midi_dispatcher.OnDrumNote(drums_midi_notes[i], level >> 1);
       }
-      override_mask <<= 1;
     }
   }
   ++drum_sequencer_step_;
-  if (drum_sequencer_step_ >= 16) {
+  if (drum_sequencer_step_ >= 32) { // BER:NOTE: 32 step in drum nodes ported from Grids
     drum_sequencer_step_ = 0;
     for (uint8_t i = 0; i < kNumDrumParts; ++i) {
       drum_sequencer_perturbation_[i] = Random::GetByte() >> 3;
@@ -651,18 +662,19 @@ uint8_t VoiceController::ReadDrumMap(
     uint8_t instrument,
     uint8_t x,
     uint8_t y) {
-  uint8_t i = x >> 7;
-  uint8_t j = y >> 7;
+  //BER:NOTE: 32 step drum map nodes ported from Grids
+  uint8_t i = x >> 6;
+  uint8_t j = y >> 6;
   const prog_uint8_t* a_map = drum_map[i][j];
   const prog_uint8_t* b_map = drum_map[i + 1][j];
   const prog_uint8_t* c_map = drum_map[i][j + 1];
   const prog_uint8_t* d_map = drum_map[i + 1][j + 1];
-  uint8_t offset = U8ShiftLeft4(instrument) + step;
+  uint8_t offset = (instrument << 5) + step;
   uint8_t a = pgm_read_byte(a_map + offset);
   uint8_t b = pgm_read_byte(b_map + offset);
   uint8_t c = pgm_read_byte(c_map + offset);
   uint8_t d = pgm_read_byte(d_map + offset);
-  return U8Mix(U8Mix(a, b, x << 1), U8Mix(c, d, x << 1), y << 1);
+  return U8Mix(U8Mix(a, b, x << 2), U8Mix(c, d, x << 2), y << 2);
 }
 
 const prog_uint8_t white_keys[] PROGMEM = {

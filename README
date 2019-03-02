@@ -2,7 +2,9 @@ This is an alternative firmware for Anushri, an analog synthesizer with a digita
 
 Here's a summary of changes in this alternative firmware _compared_ to official Anushri firmware:
 
-* Hi-hat is synthesized in the style of YM3812/OPL2, which means it now sounds more like a lo-fi emulation of an 80's home keyboard, rather than 8-bit sample playback. 
+* Hi-hat is synthesized in the style of YM3812/OPL2, which means it now sounds more like a lo-fi emulation of an 80's home keyboard, rather than 8-bit sample playback. Note that this free's up some precious memory. 
+* Ported 32 step drum nodes for the generative drum sequencer from Grids. 
+* Known limitation: 4ppqn clock sync is no longer available (reverts to 8ppqn)  
 
 This repository was originally a copy of the Mutable Instruments GitHub Anushri repository at https://github.com/pichenettes/anushri
 
